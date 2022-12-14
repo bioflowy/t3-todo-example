@@ -10,13 +10,15 @@ import {
 import { type NextPage } from "next";
 import { Trash } from "tabler-icons-react";
 import { Layout } from "../components/Layout";
-import { useForm } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import { trpc } from "../utils/trpc";
+import { createTodoSchema } from "../schema/todo";
 
 const Todo: NextPage = () => {
   const utils = trpc.useContext();
   const form = useForm({
     initialValues: { title: "", description: "" },
+    validate: zodResolver(createTodoSchema),
   });
   const createTodo = trpc.todo.create.useMutation({
     onSettled: () => {
