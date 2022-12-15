@@ -1,22 +1,62 @@
 import { z } from "zod";
-import { createTodoSchema } from "../../../schema/todo";
+import {
+  createTodoSchema,
+  deleteTodoSchema,
+  updateTodoSchema,
+} from "../../../schema/todo";
 
-import { router, publicProcedure } from "../trpc";
+import { router, publicProcedure, protectedProcedure } from "../trpc";
 
 export const todoRouter = router({
-  create: publicProcedure.input(createTodoSchema).mutation(({ input, ctx }) => {
-    return ctx.prisma.todo.create({
-      data: input,
-    });
-  }),
-  delete: publicProcedure
-    .input(z.object({ id: z.number() }))
+  create: protectedProcedure
+    .input(createTodoSchema)
     .mutation(({ input, ctx }) => {
-      return ctx.prisma.todo.delete({
-        where: { id: input.id },
+      return ctx.prisma.todo.create({
+        data: {
+          title: input?.title,
+          description: input?.description,
+          ownerId: ctx.session.user.id,
+        },
       });
     }),
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.todo.findMany();
+  delete: protectedProcedure
+    .input(deleteTodoSchema)
+    .mutation(async ({ input, ctx }) => {
+      const deleteCount = await ctx.prisma.todo.deleteMany({
+        where: { id: input.id, ownerId: ctx.session.user.id },
+      });
+      return deleteCount.count;
+    }),
+  update: protectedProcedure
+    .input(updateTodoSchema)
+    .mutation(async ({ input, ctx }) => {
+      const prev = await ctx.prisma.todo.findUniqueOrThrow({
+        where: { id: input.id },
+      });
+      if (prev.ownerId !== ctx.session.user.id) {
+        throw new Error("Update Error");
+      }
+      const newTodo = await ctx.prisma.todo.update({
+        where: { id: input.id },
+        data: {
+          title: input.title,
+          description: input.description,
+        },
+      });
+      return newTodo;
+    }),
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    return ctx.prisma.todo.findMany({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        owner: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
   }),
 });

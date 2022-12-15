@@ -6,3 +6,11 @@ export const createTodoSchema = z.object({
     .string()
     .min(5, { message: "Must be 5 or more characters long" }),
 });
+
+export const updateTodoSchema = createTodoSchema.extend({
+  id: z.number(),
+});
+
+export const deleteTodoSchema = z.object({
+  id: z.number(),
+});

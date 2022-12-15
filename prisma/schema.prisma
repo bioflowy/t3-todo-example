@@ -56,6 +56,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  todos         Todo[]
 }
 
 model VerificationToken {
@@ -70,6 +71,8 @@ model Todo {
   id            Int    @id @default(autoincrement())
   title         String
   description   String
+  ownerId       String
+  owner         User     @relation(fields: [ownerId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
