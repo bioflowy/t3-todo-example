@@ -1,29 +1,37 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
-// Prisma adapter for NextAuth, optional and can be removed
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
 
 import { env } from "../../../env/server.mjs";
 import { prisma } from "../../../server/db/client";
 
 export const authOptions: NextAuthOptions = {
-  // Include user.id on session
-  callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-      }
-      return session;
-    },
-  },
-  // Configure one or more authentication providers
-  adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      name: "E-mail/Password",
+      credentials: {
+        email: {
+          label: "E-mail",
+          type: "email",
+          placeholder: "E-mail",
+        },
+        password: { label: "パスワード", type: "password" },
+      },
+      async authorize(credentials, req) {
+        const email = credentials?.email;
+        const password = credentials?.password || "";
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user == null) {
+          return null;
+        }
+        if (bcrypt.compareSync(password, user.crypted_password || "")) {
+          const { crypted_password, emailVerified, ...user2 } = user;
+          return user2;
+        } else {
+          return null;
+        }
+      },
     }),
-    // ...add more providers here
   ],
 };
 
