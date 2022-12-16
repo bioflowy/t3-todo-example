@@ -6,6 +6,16 @@ import { env } from "../../../env/server.mjs";
 import { prisma } from "../../../server/db/client";
 
 export const authOptions: NextAuthOptions = {
+  secret: env.NEXTAUTH_SECRET,
+  // Include user.id on session
+  callbacks: {
+    session({ session, token }) {
+      if (session.user != null && token.sub != null) {
+        session.user.id = token.sub;
+      }
+      return session;
+    },
+  },
   providers: [
     CredentialsProvider({
       name: "E-mail/Password",
