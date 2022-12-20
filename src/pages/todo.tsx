@@ -13,8 +13,11 @@ import { Layout } from "../components/Layout";
 import { useForm, zodResolver } from "@mantine/form";
 import { trpc } from "../utils/trpc";
 import { createTodoSchema } from "../schema/todo";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const Todo: NextPage = () => {
+  const { data: sessionData } = useSession();
+
   const utils = trpc.useContext();
   const form = useForm({
     initialValues: { title: "", description: "" },
@@ -35,6 +38,15 @@ const Todo: NextPage = () => {
     <Layout title="Todo">
       <h1 className="">Todo</h1>
       <div>
+        <p className="text-center text-2xl text-white">
+          {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
+        </p>
+        <button
+          className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+          onClick={sessionData ? () => signOut() : () => signIn()}
+        >
+          {sessionData ? "Sign out" : "Sign in"}
+        </button>
         <form
           onSubmit={form.onSubmit((data) => {
             createTodo.mutate(data);
