@@ -1,82 +1,21 @@
 import { type NextPage } from "next";
-import {
-  ActionIcon,
-  Card,
-  Group,
-  Text,
-  TextInput,
-  Textarea,
-  Button,
-} from "@mantine/core";
 
-import { Trash } from "tabler-icons-react";
 import { Layout } from "../components/Layout";
-import { useForm, zodResolver } from "@mantine/form";
 import { trpc } from "../utils/trpc";
-import { createTodoSchema } from "../schema/todo";
 import { signIn, signOut, useSession } from "next-auth/react";
+import TodoEdit from "../features/todo/edit";
+import TodoItem from "../features/todo/item";
 
 const Todo: NextPage = () => {
-  const { data: sessionData } = useSession();
-
-  const utils = trpc.useContext();
-  const form = useForm({
-    initialValues: { title: "", description: "" },
-    validate: zodResolver(createTodoSchema),
-  });
-  const createTodo = trpc.todo.create.useMutation({
-    onSettled: () => {
-      utils.todo.getAll.invalidate();
-    },
-  });
   const todos = trpc.todo.getAll.useQuery();
-  const deleteTodo = trpc.todo.delete.useMutation({
-    onSettled: () => {
-      utils.todo.getAll.invalidate();
-    },
-  });
   return (
     <Layout title="Todo">
       <h1 className="">Todo</h1>
       <AuthShowcase />
+      <TodoEdit />
       <div>
-        <form
-          onSubmit={form.onSubmit((data) => {
-            createTodo.mutate(data);
-            form.reset();
-          })}
-        >
-          <TextInput
-            label="Title"
-            placeholder="Title"
-            {...form.getInputProps("title")}
-          />
-          <Textarea
-            label="Description"
-            placeholder="Description"
-            {...form.getInputProps("description")}
-          />
-          <Button type="submit" mt="sm">
-            New Task
-          </Button>
-        </form>
         {todos.data?.map((todo) => (
-          <Card withBorder key={todo.id} mt={"sm"}>
-            <Group position={"apart"}>
-              <Text>{todo.title}</Text>
-              {sessionData?.user?.id === todo.owner.id && (
-                <ActionIcon
-                  onClick={() => {
-                    deleteTodo.mutate({ id: todo.id });
-                  }}
-                  color={"red"}
-                  variant={"transparent"}
-                >
-                  <Trash />
-                </ActionIcon>
-              )}
-            </Group>
-          </Card>
+          <TodoItem key={todo.id} todo={todo} />
         ))}
       </div>
     </Layout>

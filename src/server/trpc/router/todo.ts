@@ -1,9 +1,9 @@
-import { z } from "zod";
 import {
   createTodoSchema,
   deleteTodoSchema,
   updateTodoSchema,
 } from "../../../schema/todo";
+import { type TodoEntry } from "../../../types/todo";
 
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 
@@ -45,7 +45,7 @@ export const todoRouter = router({
       });
       return newTodo;
     }),
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: publicProcedure.query(async ({ ctx }): Promise<TodoEntry[]> => {
     return ctx.prisma.todo.findMany({
       select: {
         id: true,
