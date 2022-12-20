@@ -64,15 +64,17 @@ const Todo: NextPage = () => {
           <Card withBorder key={todo.id} mt={"sm"}>
             <Group position={"apart"}>
               <Text>{todo.title}</Text>
-              <ActionIcon
-                onClick={() => {
-                  deleteTodo.mutate({ id: todo.id });
-                }}
-                color={"red"}
-                variant={"transparent"}
-              >
-                <Trash />
-              </ActionIcon>
+              {sessionData?.user?.id === todo.owner.id && (
+                <ActionIcon
+                  onClick={() => {
+                    deleteTodo.mutate({ id: todo.id });
+                  }}
+                  color={"red"}
+                  variant={"transparent"}
+                >
+                  <Trash />
+                </ActionIcon>
+              )}
             </Group>
           </Card>
         ))}

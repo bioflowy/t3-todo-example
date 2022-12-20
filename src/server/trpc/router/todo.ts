@@ -54,6 +54,7 @@ export const todoRouter = router({
         owner: {
           select: {
             name: true,
+            id: true,
           },
         },
       },
