@@ -8,4 +8,6 @@ export type TodoEntry = {
   title: string;
   description: string;
   owner: Owner;
+  createdAt: Date;
+  updatedAt: Date;
 };

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   createTodoSchema,
   deleteTodoSchema,
@@ -51,6 +52,8 @@ export const todoRouter = router({
         id: true,
         title: true,
         description: true,
+        createdAt: true,
+        updatedAt: true,
         owner: {
           select: {
             name: true,
@@ -60,4 +63,24 @@ export const todoRouter = router({
       },
     });
   }),
+  get: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input, ctx }): Promise<TodoEntry> => {
+      return ctx.prisma.todo.findUniqueOrThrow({
+        where: { id: input.id },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+          owner: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+        },
+      });
+    }),
 });
