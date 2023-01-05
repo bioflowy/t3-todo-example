@@ -1,40 +1,13 @@
-import { useForm, zodResolver } from "@mantine/form";
 import { TextInput, Textarea, Button, Group } from "@mantine/core";
-import React, { type FC, useEffect } from "react";
-import { createTodoSchema } from "../../schema/todo";
-import { trpc } from "../../utils/trpc";
+import React, { type FC } from "react";
+import useTodoEdit from "../../hooks/todo";
+import { type EditingTodo } from "../../types/todo";
 type Props = {
-  editingTodo: {
-    id: number | null;
-    title: string;
-    description: string;
-  };
+  editingTodo: EditingTodo;
 };
 
 const TodoEdit: FC<Props> = ({ editingTodo }) => {
-  const utils = trpc.useContext();
-  const form = useForm({
-    initialValues: {
-      id: null as number | null,
-      title: "",
-      description: "",
-    },
-    validate: zodResolver(createTodoSchema),
-  });
-  useEffect(() => {
-    form.setValues(editingTodo);
-  }, [editingTodo]);
-
-  const createTodo = trpc.todo.create.useMutation({
-    onSettled: () => {
-      utils.todo.getAll.invalidate();
-    },
-  });
-  const updateTodo = trpc.todo.update.useMutation({
-    onSettled: () => {
-      utils.todo.getAll.invalidate();
-    },
-  });
+  const { form, createTodo, updateTodo } = useTodoEdit(editingTodo);
 
   return (
     <form

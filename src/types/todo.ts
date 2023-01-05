@@ -11,3 +11,9 @@ export type TodoEntry = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type EditingTodo = {
+  id: number | null;
+  title: string;
+  description: string;
+};
