@@ -4,7 +4,7 @@ import { useForm, zodResolver } from "@mantine/form";
 import { useEffect } from "react";
 import { type EditingTodo } from "../types/todo";
 
-const useTodoEdit = (editingTodo: EditingTodo) => {
+const useTodoEdit = (editingTodoId: EditingTodo) => {
   const utils = trpc.useContext();
   const form = useForm({
     initialValues: {
@@ -14,9 +14,15 @@ const useTodoEdit = (editingTodo: EditingTodo) => {
     },
     validate: zodResolver(createTodoSchema),
   });
+  const { data } = trpc.todo.get.useQuery(
+    { id: editingTodoId as number },
+    { enabled: editingTodoId != null }
+  );
   useEffect(() => {
-    form.setValues(editingTodo);
-  }, [editingTodo]);
+    if (data) {
+      form.setValues(data);
+    }
+  }, [data?.id]);
 
   const createTodo = trpc.todo.create.useMutation({
     onSettled: () => {

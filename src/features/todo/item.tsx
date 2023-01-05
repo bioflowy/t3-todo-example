@@ -1,15 +1,10 @@
 import React, { type FC } from "react";
 import { ActionIcon, Card, Group, Text } from "@mantine/core";
 import { trpc } from "../../utils/trpc";
-import { type TodoEntry } from "../../types/todo";
+import { type EditingTodo, type TodoEntry } from "../../types/todo";
 import { Pencil, Trash } from "tabler-icons-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-type EditingTodo = {
-  id: number | null;
-  title: string;
-  description: string;
-};
 type Props = {
   todo: TodoEntry;
   setEditingTodo: (editingTodo: EditingTodo) => void;
@@ -45,7 +40,7 @@ const TodoItem: FC<Props> = ({ todo, setEditingTodo }) => {
             </ActionIcon>
             <ActionIcon
               onClick={() => {
-                setEditingTodo(todo);
+                setEditingTodo(todo.id);
               }}
               color={"red"}
               variant={"transparent"}

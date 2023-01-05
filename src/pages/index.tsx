@@ -6,22 +6,23 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import TodoEdit from "../features/todo/edit";
 import TodoItem from "../features/todo/item";
 import { useState } from "react";
+import { type EditingTodo } from "../types/todo";
 
 const Todo: NextPage = () => {
-  const [editingTodo, setEditingTodo] = useState({
-    id: null as number | null,
-    title: "",
-    description: "",
-  });
+  const [editingTodoId, setEditingTodoId] = useState(null as EditingTodo);
   const todos = trpc.todo.getAll.useQuery();
   return (
     <Layout title="Todo">
       <h1 className="">Todo</h1>
       <AuthShowcase />
-      <TodoEdit editingTodo={editingTodo} />
+      <TodoEdit editingTodoId={editingTodoId} />
       <div>
         {todos.data?.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} setEditingTodo={setEditingTodo} />
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            setEditingTodo={setEditingTodoId}
+          />
         ))}
       </div>
     </Layout>

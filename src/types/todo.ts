@@ -12,8 +12,4 @@ export type TodoEntry = {
   updatedAt: Date;
 };
 
-export type EditingTodo = {
-  id: number | null;
-  title: string;
-  description: string;
-};
+export type EditingTodo = number | null;
